@@ -59,7 +59,7 @@ STREAMS = {
         "queries": ["gram panchayat India", "district administration India farmers",
                     "rural India village water school"]
                    + [f"{p} district news" for p in LOCAL_PLACES],
-        "feeds": ["https://www.downtoearth.org.in/rss/india"]},
+        "feeds": []},
     "politics": {"label": "Politics", "queries": ["Election Commission India", "Lok Sabha Rajya Sabha"], "feeds": []},
     "leaders": {"label": "National Leaders", "queries": ["Prime Minister India announces", "President of India", "Chief Minister announces scheme"], "feeds": []},
     "technology": {"label": "Technology", "queries": ["technology India launch", "artificial intelligence research", "ISRO"], "feeds": []},
@@ -88,6 +88,8 @@ CLICKBAIT = re.compile(r"""(?ix)
   here'?s\ why | here'?s\ what | this\ is\ why | what\ happened\ next |
   \bwatch\b | \bphotos?\b | in\ pics | video:\ | \bhot\b | bold\ look |
   oops | ugly\ spat | spat\ with | troll(ed|s)? | meme | breakup | dating\ rumou?rs |
+  divorce | separation | split\ up | affair | wedding\ (pics|photos|look) | baby\ bump |
+  marriage\ (ends|over) | end\ \d+-year\ marriage | cryptic\ post | wardrobe | airport\ look |
   horoscope | astrology | zodiac | lucky\ number | top\ \d+\ (reasons|ways) |
   \bquiz\b | must[-\ ]see | unbelievable | stunning | outrage | furious | fumes
 """)
@@ -165,9 +167,13 @@ def parse_feed(raw, default_source):
         title = clean(f.get("title", ""))
         source = f.get("source") or default_source
         # Google News titles look like "Headline - Outlet"
-        m = re.match(r"^(.*)\s+-\s+([^-]{2,60})$", title)
-        if m and "news.google" in f.get("link", ""):
-            title, source = m.group(1).strip(), m.group(2).strip()
+        if "news.google" in f.get("link", ""):
+            if f.get("source") and title.endswith(" - " + f["source"]):
+                title = title[: -len(f["source"]) - 3].strip()
+            else:
+                m = re.match(r"^(.*)\s+-\s+([^-]{2,60})$", title)
+                if m:
+                    title, source = m.group(1).strip(), m.group(2).strip()
         summary = clean(f.get("description") or f.get("summary") or f.get("content") or "")
         if summary.lower().startswith(title.lower()[:40]) or "news.google" in f.get("link", ""):
             summary = ""  # Google's description just repeats the headline
