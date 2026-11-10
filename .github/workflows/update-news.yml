@@ -1,0 +1,44 @@
+# Runs the news fetcher automatically and publishes the dashboard website.
+name: Update news
+
+on:
+  schedule:
+    - cron: "30 0,6,12 * * *"   # 6:00 AM, 12:00 PM, 6:00 PM India time
+  workflow_dispatch:            # lets you press "Run workflow" by hand
+  push:
+    branches: [main]            # re-publish whenever you edit a file
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-news
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch latest news
+        run: python fetch_news.py
+      - name: Save news history
+        run: |
+          git config user.name "news-bot"
+          git config user.email "news-bot@users.noreply.github.com"
+          git add data.js history.json
+          git diff --cached --quiet || git commit -m "Update news [skip ci]"
+          git push || echo "Nothing to push"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deploy
+        uses: actions/deploy-pages@v4

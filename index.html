@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calm Daily Brief</title>
+<style>
+  :root{--bg:#f6f5f1;--card:#fff;--ink:#1f2328;--muted:#646a73;--line:#e3e1da;--accent:#2f6f5e;--accent-soft:#e3efe9;--warn:#9a6700;--chip:#efede7}
+  [data-theme=dark]{--bg:#15171a;--card:#1e2125;--ink:#e6e6e3;--muted:#9aa0a6;--line:#2e3237;--accent:#7cc4ad;--accent-soft:#1f3530;--warn:#d4a72c;--chip:#262a2f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 20px}
+  .top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  h1{font-size:20px;margin:0}
+  h1 small{font-weight:400;color:var(--muted);font-size:13px;margin-left:8px}
+  .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  input[type=search],input[type=text]{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit;min-width:200px}
+  button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-top:10px;scrollbar-width:thin}
+  .chip{white-space:nowrap;background:var(--chip);border:1px solid transparent;border-radius:999px;padding:4px 11px;font-size:13px;cursor:pointer}
+  .chip.on{background:var(--accent);color:var(--bg)}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;padding:20px;max-width:1400px;margin:auto}
+  @media(max-width:980px){main{grid-template-columns:1fr}}
+  section{margin-bottom:28px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  h2 span{text-transform:none;letter-spacing:0;font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+  .card.read{opacity:.55}
+  .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .tag{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 7px;font-weight:600}
+  .card h3{font-size:15px;margin:0;line-height:1.35}
+  .card h3 a{color:inherit;text-decoration:none}
+  .card h3 a:hover{text-decoration:underline}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  .src{font-size:12px;color:var(--muted)}
+  .src a{color:var(--accent)}
+  .single{color:var(--warn)}
+  .actions{display:flex;gap:6px;margin-top:auto;padding-top:4px}
+  .actions button{font-size:12px;padding:3px 8px}
+  .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  @media(max-width:760px){.cols{grid-template-columns:1fr}}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .col h4{margin:0 0 8px;font-size:13px;color:var(--accent)}
+  .col li{margin-bottom:8px;font-size:14px}
+  .col ul{padding-left:18px;margin:0}
+  .col a{color:inherit}
+  .thread{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+  .thread summary{cursor:pointer;font-weight:600}
+  .thread summary .meta{font-weight:400;margin-top:4px}
+  .timeline{border-left:2px solid var(--accent);margin:12px 0 0 6px;padding-left:14px}
+  .tl{margin-bottom:10px;position:relative}
+  .tl:before{content:"";position:absolute;left:-20px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  .tl .d{font-size:12px;color:var(--muted)}
+  aside .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+  aside h2{margin-bottom:8px}
+  .kb{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+  .kb:last-child{border:0}
+  .kb b{display:block;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+  .date{display:flex;gap:10px;padding:5px 0;font-size:14px}
+  .date .when{min-width:58px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .date.today{font-weight:700;color:var(--accent)}
+  .grid .empty{grid-column:1/-1}
+  .empty{color:var(--muted);font-size:14px;background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:16px}
+  code{background:var(--chip);padding:1px 5px;border-radius:5px}
+  .watch{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .wchip{background:var(--chip);border-radius:999px;padding:3px 6px 3px 11px;font-size:13px}
+  .wchip button{border:0;background:none;padding:0 4px;color:var(--muted)}
+  .note{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>Calm Daily Brief <small id="updated"></small></h1>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search headlines…">
+      <label class="note"><input type="checkbox" id="multi"> 2+ outlets only</label>
+      <label class="note"><input type="checkbox" id="hideRead"> Hide read</label>
+      <button id="theme" title="Toggle dark mode">◐</button>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<main>
+  <div>
+    <section id="indiaSec">
+      <h2>India: ground level to national <span>local first, then state, then national</span></h2>
+      <div class="cols" id="india"></div>
+    </section>
+
+    <section>
+      <h2>Follow-ups: day by day <span id="threadCount"></span></h2>
+      <div class="watch" id="watchlist"></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <input type="text" id="watchInput" placeholder="Track a topic, e.g. monsoon, RBI repo, Chandrayaan">
+        <button id="watchAdd">Track</button>
+      </div>
+      <div id="threads"></div>
+    </section>
+
+    <section>
+      <h2>Today's bites <span id="storyCount"></span></h2>
+      <div class="grid" id="cards"></div>
+    </section>
+  </div>
+
+  <aside>
+    <div class="box">
+      <h2>Knowledge bites <span id="kbDate"></span></h2>
+      <div id="knowledge"></div>
+    </div>
+    <div class="box">
+      <h2>Important dates</h2>
+      <div id="dates"></div>
+    </div>
+    <div class="box">
+      <h2>On this day in history</h2>
+      <div id="otd"></div>
+    </div>
+    <div class="box note">
+      <b>How this stays calm.</b> Clickbait, outrage and gossip phrasing and graphic crime details are filtered out.
+      Each card shows how many outlets reported the story. A single-outlet story is marked so you can read it with care.
+      Stories that recur across days are linked into follow-up timelines.
+    </div>
+  </aside>
+</main>
+
+<script src="knowledge.js"></script>
+<script src="data.js" onerror="window.DASH=null"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem("cdb_" + k)) ?? d } catch { return d } },
+  set: (k, v) => localStorage.setItem("cdb_" + k, JSON.stringify(v))
+};
+const D = window.DASH;
+const KN = window.KNOWLEDGE || {};
+const state = { stream: "all", q: "", multi: store.get("multi", false), hideRead: store.get("hideRead", false) };
+let read = new Set(store.get("read", []));
+let watch = store.get("watch", []);
+
+document.documentElement.dataset.theme = store.get("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+$("#theme").onclick = () => { const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = t; store.set("theme", t); };
+
+function ago(iso){
+  const m = (Date.now() - new Date(iso)) / 60000;
+  if (m < 60) return Math.max(1, Math.round(m)) + "m ago";
+  if (m < 1440) return Math.round(m / 60) + "h ago";
+  return Math.round(m / 1440) + "d ago";
+}
+const label = k => D?.streams?.[k]?.label || k;
+const keyOf = s => s.title.toLowerCase().slice(0, 80);
+
+function matches(s, anyStream){
+  if (!anyStream && state.stream !== "all" && s.stream !== state.stream) return false;
+  if (state.multi && s.sources.length < 2) return false;
+  if (state.hideRead && read.has(keyOf(s))) return false;
+  if (state.q && !(s.title + " " + s.summary).toLowerCase().includes(state.q)) return false;
+  return true;
+}
+
+function sourcesLine(s){
+  const n = s.sources.length;
+  const links = s.sources.slice(0, 4).map(x => `<a href="${esc(x.link)}" target="_blank" rel="noopener">${esc(x.name)}</a>`).join(", ");
+  return n > 1 ? `<div class="src">${n} outlets: ${links}${n > 4 ? "…" : ""}</div>`
+               : `<div class="src single" title="Only one outlet so far. Read with care.">1 outlet: ${links}</div>`;
+}
+
+function card(s){
+  const k = keyOf(s);
+  return `<article class="card ${read.has(k) ? "read" : ""}">
+    <div class="meta"><span class="tag">${esc(label(s.stream))}</span><span>${ago(s.date)}</span></div>
+    <h3><a href="${esc(s.sources[0]?.link)}" target="_blank" rel="noopener" data-read="${esc(k)}">${esc(s.title)}</a></h3>
+    ${s.summary ? `<p>${esc(s.summary)}</p>` : ""}
+    ${sourcesLine(s)}
+    <div class="actions">
+      <button data-follow="${esc(s.title)}">＋ Follow</button>
+      <button data-toggle="${esc(k)}">${read.has(k) ? "Unread" : "Mark read"}</button>
+    </div></article>`;
+}
+
+function renderChips(){
+  const keys = D ? Object.keys(D.streams) : [];
+  $("#chips").innerHTML = ["all", ...keys].map(k =>
+    `<span class="chip ${state.stream === k ? "on" : ""}" data-stream="${k}">${k === "all" ? "All streams" : esc(label(k))}</span>`).join("");
+}
+
+function renderIndia(){
+  const sec = $("#indiaSec");
+  if (!D) { sec.style.display = "none"; return; }
+  sec.style.display = (state.stream === "all" || state.stream.startsWith("india_")) ? "" : "none";
+  const lv = [["india_ground", "Ground level"], ["india_state", "States"], ["india_national", "National"]];
+  $("#india").innerHTML = lv.map(([k, t]) => {
+    const items = D.stories.filter(s => s.stream === k && matches(s, true)).slice(0, 6);
+    return `<div class="col"><h4>${t}</h4>${items.length ? "<ul>" + items.map(s =>
+      `<li><a href="${esc(s.sources[0]?.link)}" target="_blank" rel="noopener">${esc(s.title)}</a> <span class="note">· ${esc(s.sources[0]?.name)}${s.sources.length > 1 ? " +" + (s.sources.length - 1) : ""}</span></li>`).join("") + "</ul>"
+      : `<div class="note">Nothing new. Add your state or district to LOCAL_PLACES in fetch_news.py.</div>`}</div>`;
+  }).join("");
+}
+
+function renderCards(){
+  if (!D) {
+    $("#cards").innerHTML = `<div class="empty">No news loaded yet. Open a terminal in this folder and run <code>python3 fetch_news.py</code>, then reload this page. The knowledge bites and important dates on the right already work offline.</div>`;
+    return;
+  }
+  const list = D.stories.filter(s => !s.stream.startsWith("india_") || state.stream !== "all").filter(matches);
+  $("#storyCount").textContent = list.length + " stories";
+  $("#cards").innerHTML = list.slice(0, 120).map(card).join("") || `<div class="empty">No stories match these filters.</div>`;
+}
+
+function watchThreads(){
+  // Build a timeline for each topic you track, from today's stories and past threads.
+  if (!D) return [];
+  const pool = [...D.stories, ...D.threads.flatMap(t => t.updates.map(u => ({...u, stream: t.stream})))];
+  return watch.map(w => {
+    const words = w.toLowerCase().split(/\s+/).filter(x => x.length > 2);
+    const seen = new Set();
+    const ups = pool.filter(s => {
+      const t = s.title.toLowerCase();
+      if (seen.has(t) || !words.every(x => t.includes(x))) return false;
+      seen.add(t); return true;
+    }).sort((a, b) => a.date.localeCompare(b.date));
+    return { title: "Tracking: " + w, stream: ups.at(-1)?.stream || "", updates: ups, mine: true,
+             days: new Set(ups.map(u => u.date.slice(0, 10))).size };
+  });
+}
+
+function renderThreads(){
+  $("#watchlist").innerHTML = watch.map((w, i) => `<span class="wchip">${esc(w)}<button data-unwatch="${i}" title="Stop tracking">×</button></span>`).join("");
+  if (!D) { $("#threads").innerHTML = `<div class="empty">Follow-up timelines appear after your first fetch. They grow richer each day you run the fetcher, because it keeps 30 days of history.</div>`; return; }
+  const auto = D.threads.filter(t => state.stream === "all" || t.stream === state.stream)
+    .filter(t => !state.q || (t.title + t.theme.join(" ")).toLowerCase().includes(state.q));
+  const all = [...watchThreads(), ...auto];
+  $("#threadCount").textContent = auto.length + " developing stories";
+  $("#threads").innerHTML = all.map((t, i) => `
+    <details class="thread" ${t.mine && i < 3 ? "open" : ""}>
+      <summary>${esc(t.title)}
+        <div class="meta">${t.stream ? `<span class="tag">${esc(label(t.stream))}</span>` : ""}
+          <span>${t.days} day${t.days === 1 ? "" : "s"} · ${t.updates.length} update${t.updates.length === 1 ? "" : "s"}</span>
+          ${t.theme ? `<span>about: ${esc(t.theme.join(", "))}</span>` : ""}</div>
+      </summary>
+      <div class="timeline">${t.updates.length ? t.updates.slice().reverse().map(u => `
+        <div class="tl"><div class="d">${new Date(u.date).toLocaleDateString(undefined, {weekday:"short", day:"numeric", month:"short"})} · ${esc(u.sources?.[0]?.name || "")}${u.sources?.length > 1 ? " +" + (u.sources.length - 1) : ""}</div>
+          <a href="${esc(u.sources?.[0]?.link)}" target="_blank" rel="noopener" style="color:inherit">${esc(u.title)}</a>
+          ${u.summary ? `<div class="note">${esc(u.summary)}</div>` : ""}</div>`).join("")
+        : `<div class="note">No matching headlines yet. Updates will appear here as the topic is reported.</div>`}</div>
+    </details>`).join("") || `<div class="empty">No multi-day stories yet. Run the fetcher daily and they build up automatically.</div>`;
+}
+
+function renderKnowledge(){
+  const day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+  $("#kbDate").textContent = new Date().toLocaleDateString(undefined, {day:"numeric", month:"short"});
+  const names = {mathematics:"Mathematics", history:"History", geography:"Geography", technology:"Technology", finance:"Finance", health:"Health", fitness:"Fitness",
+    knowledge:"Science", psychology:"Psychology", philosophy:"Philosophy", softskills:"Soft skills", politics:"Civics", music:"Music"};
+  let keys = Object.keys(KN);
+  if (state.stream !== "all") keys = keys.filter(k => k === state.stream || (state.stream === "leaders" && k === "politics")).concat(keys.filter(k => k !== state.stream)).slice(0, 13);
+  $("#knowledge").innerHTML = keys.map(k => `<div class="kb"><b>${names[k] || k}</b>${esc(KN[k][day % KN[k].length])}</div>`).join("");
+}
+
+function renderDates(){
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const rows = (window.IMPORTANT_DATES || []).map(([m, d, t]) => {
+    let dt = new Date(now.getFullYear(), m - 1, d);
+    if (dt < now) dt = new Date(now.getFullYear() + 1, m - 1, d);
+    return { dt, t, diff: Math.round((dt - now) / 864e5) };
+  }).sort((a, b) => a.dt - b.dt).slice(0, 6);
+  $("#dates").innerHTML = rows.map(r => `<div class="date ${r.diff === 0 ? "today" : ""}">
+    <span class="when">${r.diff === 0 ? "Today" : r.dt.toLocaleDateString(undefined, {day:"numeric", month:"short"})}</span>
+    <span>${esc(r.t)}${r.diff > 0 ? ` <span class="note">(in ${r.diff} day${r.diff > 1 ? "s" : ""})</span>` : ""}</span></div>`).join("");
+}
+
+function renderOTD(){
+  const ev = D?.onThisDay || [];
+  $("#otd").innerHTML = ev.length ? ev.slice(0, 8).map(e => `<div class="date"><span class="when">${esc(e.year)}</span><span>${esc(e.text)}</span></div>`).join("")
+    : `<div class="note">Loaded from Wikipedia when you run the fetcher.</div>`;
+}
+
+function render(){
+  renderChips(); renderIndia(); renderThreads(); renderCards(); renderKnowledge(); renderDates(); renderOTD();
+  if (D) {
+    const st = D.stats || {};
+    $("#updated").textContent = `updated ${ago(D.generated)} · ${st.filtered_out ?? 0} clickbait or stale headlines filtered`;
+  } else $("#updated").textContent = "offline mode";
+}
+
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (t.dataset.stream) { state.stream = t.dataset.stream; render(); }
+  else if (t.dataset.toggle) { const k = t.dataset.toggle; read.has(k) ? read.delete(k) : read.add(k); store.set("read", [...read].slice(-2000)); render(); }
+  else if (t.dataset.read) { read.add(t.dataset.read); store.set("read", [...read].slice(-2000)); setTimeout(render, 50); }
+  else if (t.dataset.follow) {
+    const stop = new Set("the a an of to in on for and with by at from as is are was after over into says said new".split(" "));
+    const words = t.dataset.follow.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(w => w.length > 3 && !stop.has(w)).slice(0, 2);
+    const topic = prompt("Track this topic (keywords that must appear in headlines):", words.join(" "));
+    if (topic && topic.trim()) { watch.push(topic.trim()); store.set("watch", watch); render(); }
+  }
+  else if (t.dataset.unwatch) { watch.splice(+t.dataset.unwatch, 1); store.set("watch", watch); render(); }
+});
+$("#watchAdd").onclick = () => { const v = $("#watchInput").value.trim(); if (v) { watch.push(v); store.set("watch", watch); $("#watchInput").value = ""; render(); } };
+$("#watchInput").onkeydown = e => { if (e.key === "Enter") $("#watchAdd").click(); };
+$("#q").oninput = e => { state.q = e.target.value.toLowerCase().trim(); render(); };
+$("#multi").checked = state.multi; $("#multi").onchange = e => { state.multi = e.target.checked; store.set("multi", state.multi); render(); };
+$("#hideRead").checked = state.hideRead; $("#hideRead").onchange = e => { state.hideRead = e.target.checked; store.set("hideRead", state.hideRead); render(); };
+render();
+</script>
+</body>
+</html>
